@@ -1,0 +1,19 @@
+OLS / LR 0.0000
+ rsq_lasso_train  rsq_lasso_valid  rsq_lasso_valid2
+0          0.00330          0.00353           0.00495
+
+LR 0.0001
+   rsq_lasso_train  rsq_lasso_valid  rsq_lasso_valid2
+0          0.00308          0.00315           0.00462
+
+LR 0.0003
+   rsq_lasso_train  rsq_lasso_valid  rsq_lasso_valid2
+0          0.00288          0.00275           0.00442
+
+LR 0.0006
+   rsq_lasso_train  rsq_lasso_valid  rsq_lasso_valid2
+0          0.00254          0.00219           0.00390
+
+
+
+
