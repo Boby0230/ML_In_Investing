@@ -1,0 +1,35 @@
+Example NN
+
+Date 2016,1,31 (Jason's date and hyperparameters)
+LR 0.00001
+epochs 3
+R-squared train: 0.0024924068472941263
+R-squared valid: 0.0022489408643021624
+R-squared all: 0.002316806161655527
+
+Date 2015,1,31  
+LR 0.00001
+epochs 3
+R-squared train: 0.0025602003687417163
+R-squared valid: -0.0003063553888034143
+R-squared all: 0.002440589723625708
+
+Date 2015,1,31
+LR 0.0001
+epochs 3
+R-squared train: 0.0015337381138681438
+R-squared valid: 5.916003726325059e-05
+R-squared all: 0.0024815258028755283
+
+Improved NN
+
+Date 2015,1,31
+R-squared train: 0.003360515345742998
+R-squared valid: 0.0030378084656568216
+R-squared all: 0.004043187537610238
+
+Date 2016,1,31
+R-squared train: 0.003315790847675637
+R-squared valid: 0.0035178083786554515
+R-squared all: 0.004044673531744647
+
