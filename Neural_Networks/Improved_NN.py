@@ -27,7 +27,7 @@ path = '/Users/bobi/Desktop/FIN 427/ML_In_Investing/Neural_Networks/'
 returns01 = pd.read_csv('/Users/bobi/Desktop/FIN 427/ML_In_Investing/Data/Final data 20250312_2300.csv')
 returns01['month'] = pd.to_datetime(returns01['month'], format='%d-%b-%Y')
 
-datecut1 = datetime.datetime(2016, 1, 31)
+datecut1 = datetime.datetime(2015, 1, 31)
 datecut2 = datetime.datetime(2023, 1, 31)
 
 returns01_train = returns01[returns01['month'] <= datecut1]
@@ -131,4 +131,61 @@ print('R-squared all:', r2_score(y_all, preds_all))
 
 # Make predictions for the validation and test data
 preds_predict = nnet1.predict(x_predict)
+
+# Put data together for review
+dfx_all = x_all.rename_axis('oldindex').reset_index()
+dfy_all = pd.DataFrame(y_all).rename_axis('oldindex').reset_index()
+predictions_all = pd.DataFrame(preds_all, columns=['pred_indadjret'])
+agg1_all = pd.merge(dfx_all, dfy_all)
+# print(agg1_all.shape)
+agg2_all = agg1_all.merge(predictions_all, how='inner', left_index=True, right_index=True)
+# print(agg2_all.shape)
+
+dfx_predict = x_predict.rename_axis('oldindex').reset_index()
+dfy_predict = pd.DataFrame(y_predict).rename_axis('oldindex').reset_index()
+predictions_predict = pd.DataFrame(preds_predict, columns=['pred_indadjret'])
+agg1_predict = pd.merge(dfx_predict, dfy_predict)
+# print(agg1_predict.shape)
+agg2_predict = agg1_predict.merge(predictions_predict, how='inner', left_index=True, right_index=True)
+# print(agg2_predict.shape)
+
+selected_columns = agg2_predict[['oldindex', 'pred_indadjret']]
+# print(selected_columns.shape)
+# print(selected_columns)
+
+returns01_predict2 = returns01_predict.merge(selected_columns,
+    left_index=True, right_on='oldindex')
+print(returns01_predict2)
+
+# Split the predicted returns into quintiles and show descriptive statistics by quintile
+agg2_all['Quintile'] = pd.qcut(agg2_all['pred_indadjret'], q=5, labels=[1, 2, 3, 4, 5])
+
+# Group by 'Quintile' and compute summary statistics for 'Variable1' and 'Variable2'
+summary_stats = agg2_all.groupby('Quintile',observed=True).agg({
+    'indadjret'         : ['mean', 'median'],
+    'pred_indadjret'    : ['mean', 'median'],
+    'zlnlag1mcreal'     : ['mean', 'median'],
+    'zfinlag1bm'        : ['mean', 'median'],
+    'zfing01dyadj'      : ['mean', 'median'],
+    'zfing02esg'        : ['mean', 'median'],
+    'zfing03nibadj'     : ['mean', 'median'],
+    'zfing04fcfyadj'    : ['mean', 'median'],
+    'zfing05rdsadj'     : ['mean', 'median'],
+    'zfing06_invpegadj' : ['mean', 'median'],
+    'zfing07epadj'      : ['mean', 'median'],
+    'zfing08sadadj'     : ['mean', 'median'],
+    'zfing09shoadj'     : ['mean', 'median'],
+    'zfing10shiadj'     : ['mean', 'median'],
+    'zfing11ret5adj'    : ['mean', 'median'],
+    'zfing12empadj'     : ['mean', 'median'],
+    'zfing13sueadj'     : ['mean', 'median'],
+    'zfing14erevadj'    : ['mean', 'median']
+})
+
+# print(summary_stats)
+
+# Export summary statistics to Excel
+# with pd.ExcelWriter(path + 'Neural networks output 20250328_1411.xlsx') as writer:
+#     summary_stats.to_excel(writer, sheet_name='summary_stats')
+#     returns01_predict2.to_excel(writer, sheet_name='returns01_predict2')
 
