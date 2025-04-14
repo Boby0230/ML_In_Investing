@@ -1,2 +1,4 @@
 Add database to the Data folder
 create virtual environments and install dependencies
+python 3.13 used for OLS, LASSO
+python 3.11.8 used for Neural Networks to allow for the installation of tensorflow
