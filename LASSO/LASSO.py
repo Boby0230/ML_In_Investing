@@ -23,7 +23,7 @@ from docx import Document
 # pd.options.display.float_format = '{:.5f}'.format
 
 # Define a path for import and export
-path = '/Users/bobi/Desktop/FIN 427/ML_In_investing/OLS'
+path = '/Users/bobi/Desktop/FIN 427/ML_In_investing/LASSO'
 
 # Import and view data
 returns01 = pd.read_csv('/Users/bobi/Desktop/FIN 427/ML_In_Investing/Data/Final data 20250312_2300.csv')
@@ -33,7 +33,7 @@ returns01['month'] = pd.to_datetime(returns01['month'], format='%d-%b-%Y')
 # print(returns01.columns)
 
 datecut1 = datetime.datetime(2015, 12, 31)
-datecut2 = datetime.datetime(2022, 12, 31)
+datecut2 = datetime.datetime(2023, 1, 31)
 # print(datecut1)
 # print(datecut2)
 returns01_train   = returns01[returns01['month'] <= datecut1]
@@ -140,11 +140,66 @@ lasso_coef_df = pd.DataFrame({'Feature': ['intercept']       + xl_train.columns.
 print(lasso_coef_df)
 
 # Create a Numpy array of R-squared and then a Dataframe, for export to Excel
-# exportarray01_lasso = np.array([[rsq_lasso_train, rsq_lasso_valid, rsq_lasso_valid2]])
-# exportdf01_lasso = pd.DataFrame(exportarray01_lasso,columns=['rsq_lasso_train', 'rsq_lasso_valid', 'rsq_lasso_valid2'])
-# print(exportdf01_lasso)
+exportarray01_lasso = np.array([[rsq_lasso_train, rsq_lasso_valid, rsq_lasso_valid2]])
+exportdf01_lasso = pd.DataFrame(exportarray01_lasso,columns=['rsq_lasso_train', 'rsq_lasso_valid', 'rsq_lasso_valid2'])
+print(exportdf01_lasso)
 
 # Export to Excel
-# with pd.ExcelWriter(path + 'Excel 06 OLS and LASSO 20250212_2056.xlsx') as writer:
-#     lasso_coef_df.to_excel(writer, sheet_name='coef_lasso')
-#     exportdf01_lasso.to_excel(writer, sheet_name='exportdf01_lasso')
+with pd.ExcelWriter(path + 'Excel 06 OLS and LASSO 20250212_2056.xlsx') as writer:
+    lasso_coef_df.to_excel(writer, sheet_name='coef_lasso')
+    exportdf01_lasso.to_excel(writer, sheet_name='exportdf01_lasso')
+
+# ----------------------------------------------------
+# Step: Predict returns for the last month (Dec 2022)
+# ----------------------------------------------------
+
+# Prepare all data before Dec 2022
+xl_all = returns01_all[['lag1mcreal',
+                        'zfing01dyadj',
+                        'zfing02esg','fing02esgmiss',
+                        'zfing03nibadj','fing03nibadjmiss',
+                        'zfing04fcfyadj','fing04fcfyadjmiss',
+                        'zfing05rdsadj','fing05rdsadjmiss',
+                        'zfing06_invpegadj','fing06_invpegadjmiss',
+                        'zfing07epadj','fing07epadjmiss',
+                        'zfing08sadadj','fing08sadadjmiss',
+                        'zfing09shoadj','fing09shoadjmiss',
+                        'zfing10shiadj','fing10shiadjmiss',
+                        'zfing11ret5adj','fing11ret5adjmiss',
+                        'zfing12empadj','fing12empadjmiss',
+                        'zfing13sueadj','fing13sueadjmiss',
+                        'zfing14erevadj','fing14erevadjmiss']]
+yl_all = returns01_all['indadjret']
+
+# Data for the prediction month
+xl_predict = returns01_predict[['lag1mcreal',
+                                'zfing01dyadj',
+                                'zfing02esg','fing02esgmiss',
+                                'zfing03nibadj','fing03nibadjmiss',
+                                'zfing04fcfyadj','fing04fcfyadjmiss',
+                                'zfing05rdsadj','fing05rdsadjmiss',
+                                'zfing06_invpegadj','fing06_invpegadjmiss',
+                                'zfing07epadj','fing07epadjmiss',
+                                'zfing08sadadj','fing08sadadjmiss',
+                                'zfing09shoadj','fing09shoadjmiss',
+                                'zfing10shiadj','fing10shiadjmiss',
+                                'zfing11ret5adj','fing11ret5adjmiss',
+                                'zfing12empadj','fing12empadjmiss',
+                                'zfing13sueadj','fing13sueadjmiss',
+                                'zfing14erevadj','fing14erevadjmiss']]
+
+# Re-fit model on all pre-Dec 2022 data
+lasso_all = Lasso(alpha=lasso_penalty)
+lasso_all.fit(xl_all, yl_all)
+
+# Predict for Dec 2022
+preds_lasso_predict = lasso_all.predict(xl_predict)
+
+# Merge predictions with original Dec 2022 data
+returns01_predict_with_lasso = returns01_predict.copy()
+returns01_predict_with_lasso['pred_indadjret_lasso'] = preds_lasso_predict
+
+# Export to Excel
+# output_file_lasso = path + '/LASSO_predicted_returns_Dec2022.xlsx'
+# returns01_predict_with_lasso.to_excel(output_file_lasso, index=False)
+# print(f"LASSO predictions exported to: {output_file_lasso}")

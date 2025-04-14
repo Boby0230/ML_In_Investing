@@ -33,7 +33,7 @@ returns01['month'] = pd.to_datetime(returns01['month'], format='%d-%b-%Y')
 # print(returns01.columns)
 
 datecut1 = datetime.datetime(2019, 12, 31)
-datecut2 = datetime.datetime(2022, 12, 31)
+datecut2 = datetime.datetime(2023, 1, 31)
 print(datecut1)
 print(datecut2)
 returns01_train   = returns01[returns01['month'] <= datecut1]
@@ -145,3 +145,59 @@ print(f'Square root of the mean squared error in test sample: {rmse_valid2:.5f}'
 # exportdf01 = pd.DataFrame(exportarray01,columns=['rsq_train', 'rsq_valid', 'rsq_valid2'])
 # print(exportdf01)
 
+# -------------------------------------------
+# Step: Predict returns for January 2023
+# -------------------------------------------
+
+# Prepare data
+x_all = sm.add_constant(returns01_all[[
+    'lag1mcreal',
+    'fing01dyadj','fing01dyadjmiss',
+    'fing02esg','fing02esgmiss',
+    'fing03nibadj','fing03nibadjmiss',
+    'fing04fcfyadj','fing04fcfyadjmiss',
+    'fing05rdsadj','fing05rdsadjmiss',
+    'fing06_invpegadj','fing06_invpegadjmiss',
+    'fing07epadj','fing07epadjmiss',
+    'fing08sadadj','fing08sadadjmiss',
+    'fing09shoadj','fing09shoadjmiss',
+    'fing10shiadj','fing10shiadjmiss',
+    'fing11ret5adj','fing11ret5adjmiss',
+    'fing12empadj','fing12empadjmiss',
+    'fing13sueadj','fing13sueadjmiss',
+    'fing14erevadj','fing14erevadjmiss'
+]])
+y_all = returns01_all['indadjret']
+
+x_predict = sm.add_constant(returns01_predict[[
+    'lag1mcreal',
+    'fing01dyadj','fing01dyadjmiss',
+    'fing02esg','fing02esgmiss',
+    'fing03nibadj','fing03nibadjmiss',
+    'fing04fcfyadj','fing04fcfyadjmiss',
+    'fing05rdsadj','fing05rdsadjmiss',
+    'fing06_invpegadj','fing06_invpegadjmiss',
+    'fing07epadj','fing07epadjmiss',
+    'fing08sadadj','fing08sadadjmiss',
+    'fing09shoadj','fing09shoadjmiss',
+    'fing10shiadj','fing10shiadjmiss',
+    'fing11ret5adj','fing11ret5adjmiss',
+    'fing12empadj','fing12empadjmiss',
+    'fing13sueadj','fing13sueadjmiss',
+    'fing14erevadj','fing14erevadjmiss'
+]])
+
+# Fit model on all data up to Jan 2023
+model_all = sm.OLS(y_all, x_all).fit()
+
+# Predict for Jan 2023
+preds_predict = model_all.predict(x_predict)
+
+# Merge predictions with original data
+returns01_predict_with_preds = returns01_predict.copy()
+returns01_predict_with_preds['pred_indadjret'] = preds_predict.values
+
+# Export to Excel
+output_file = path + '/OLS_predicted_returns_Jan2023.xlsx'
+returns01_predict_with_preds.to_excel(output_file, index=False)
+print(f"Predictions exported to: {output_file}")

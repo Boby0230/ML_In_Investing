@@ -182,7 +182,7 @@ summary_stats = agg2_all.groupby('Quintile',observed=True).agg({
     'zfing14erevadj'    : ['mean', 'median']
 })
 
-# print(summary_stats)
+print(summary_stats)
 
 # Export summary statistics to Excel
 # with pd.ExcelWriter(path + 'Neural networks output 20250328_1411.xlsx') as writer:
